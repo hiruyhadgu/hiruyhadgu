@@ -233,23 +233,56 @@ while game_over == False:
         dealer_sum['dealer_hand']=sum_of_cards
     for key, value in dealer_hand.items():
         print(key, value)
-    all_sum = {**dealer_sum, **add_cards}
-   
-    if dealer_sum['dealer_hand'] > 21:
-        
-        for num in range(len(add_cards)):
-           max_val = add_cards[key]
-           while max_val > add_cards[key] and max_val < 21:
-               max_val = add_cards[key]
-    elif dealer_sum['dealer_hand']==21:
-        for key in add_cards:
-            max_val = add_cards[key]
-            while max_val == a
-       
-       for key in add_cards:
-           if add_cards[key] < 21:
-               
 
+    all_sum = {**dealer_sum, **add_cards}
+    max_val = list(all_sum.values())
+    max_ke = list(all_sum.keys())
+    max_hand = max_ke[max_val.index(max(max_val))]
+    player_count = 0
+    check_equal = []
+    if max_hand != 'dealer_hand' and max(max_val)<=21:
+        check_equal = []
+        while player_count <= len(max_val)-1:
+            if max_val[player_count] == max(max_val):
+                check_equal.append(max_ke[player_count])
+            else:
+                check_equal.append(max_hand)
+            player_count+=1
+        for nn in range(len(check_equal)):
+            players[check_equal[nn]]=players[check_equal[nn]]+make_bet[check_equal[nn]]
+    elif max_hand == 'dealer_hand' and max(max_val)<=21:
+        check_equal = []
+        while player_count <= len(max_val)-1:
+            if max_val[player_count] == max(max_val) and max_ke[player_count] != max_hand:
+                check_equal.append(max_ke[player_count])
+            player_count+=1
+        for nn in range(len(check_equal)):
+            players[check_equal[nn]]=players[check_equal[nn]]+make_bet[check_equal[nn]]
+    elif max_hand == 'dealer_hand' and max(max_val) > 21:
+        check_equal = []
+        while player_count <= len(max_val)-1:
+            if max_val[player_count] <= 21:
+                check_equal.append(max_ke[player_count])
+            player_count+=1
+        for nn in range(len(check_equal)):
+            players[check_equal[nn]]=players[check_equal[nn]]+make_bet[check_equal[nn]]
+    elif max_hand != 'dealer_hand' and max(max_val) > 21:
+        check_equal = []
+        while player_count <= len(max_val)-1:
+            if max_val[player_count] == max(max_val):
+                check_equal.append(max_ke[player_count])
+            else:
+                check_equal.append(max_hand)
+            player_count+=1
+        for nn in range(len(check_equal)):
+            players[check_equal[nn]]=players[check_equal[nn]]+make_bet[check_equal[nn]]
+
+
+    print(max_hand)
+    print(all_sum)
+    print(dealer_sum)
+    print(add_cards)
+    print(players)               
        
     for key in players.copy():
        decide = Players.keep_playing(key)
@@ -257,7 +290,3 @@ while game_over == False:
            players.pop(key)
     if players=={}:
         game_over=True
-
-print(all_sum)
-print(dealer_sum)
-print(add_cards)
