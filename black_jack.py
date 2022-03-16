@@ -41,6 +41,10 @@ class Players:
             input('Player ID (please enter One Two, Three etc...) '),
             input('Buy in amount in dollars: '))
     
+    def keep_playing(self):
+        player_decide = input(f"Player {self.player_id}, keep playing? (y or n): ")
+        return player_decide
+    
     def new_hand(self):
         self.new_card = new_deck.deal_one()
         return self.new_card
@@ -60,6 +64,9 @@ class Players:
 
     def h_s_f(self):
         return(int(input(f"Player {key.upper()}, hit(1)/stay(2)/fold(3)?: ")))
+    
+    def check_winner(self):
+        pass
 
     def __str__(self):
         return "Player " + self.player_id + " enters game with " + "$" + self.buyin_amount + "."
@@ -170,7 +177,9 @@ while game_over == False:
                     print(dealt_hand[key])
                     ace_1_or_11 = input(f'Player {key}, Card No {n+1} is an Ace. Count Ace as 1 or 11?: ')
                     player_card_sum = player_card_sum + int(ace_1_or_11)
+                    set_of_hands[n] = list(set_of_hands[n])
                     set_of_hands[n][2]=ace_1_or_11
+                    set_of_hands[n] = tuple(set_of_hands[n])
                 else:
                     player_card_sum = player_card_sum + int(set_of_hands[n][2])
         add_cards[key]=player_card_sum
@@ -189,7 +198,9 @@ while game_over == False:
                     print(dealt_hand[key])
                     ace_1_or_11 = input(f'Player {key}, Card No {n+1} is an Ace. Count Ace as 1 or 11?: ')
                     player_card_sum = player_card_sum + int(ace_1_or_11)
+                    set_of_hands[n] = list(set_of_hands[n])
                     set_of_hands[n][2]=ace_1_or_11
+                    set_of_hands[n] = tuple(set_of_hands[n])
                 else:
                     player_card_sum = player_card_sum + int(set_of_hands[n][2])
             print(set_of_hands)
@@ -199,7 +210,7 @@ while game_over == False:
 
     #    player_card_sum=0
     print(add_cards)
-
+    dealer_sum ={}
   # Dealer turns dealer's next cards
     while sum_of_cards <= 16:
         dealer_card_no+=1
@@ -218,11 +229,23 @@ while game_over == False:
                 sum_of_cards=sum_of_cards + int(ace_tuple[0])
         else:
             sum_of_cards = sum_of_cards + int(dealer_next_card.value)
-
+        dealer_sum['dealer_hand']=sum_of_cards
     for key, value in dealer_hand.items():
         print(key, value)
-    game_over=True
+    all_sum = {**dealer_sum, **add_cards}
 
-print(dealer_card_no)
-print(sum_of_cards)
+    for key in all_sum.copy():
+        if value > 21:
+            all_sum.pop(key)
+
+    decide = []
+    if all_sum =={}:
+        for key in player_info:
+            decide = Players.keep_playing(decide)
+            if decide == 'n':
+                player_info[key]      
+
+    game_over=True
+print(all_sum)
+print(dealer_sum)
 print(add_cards)
