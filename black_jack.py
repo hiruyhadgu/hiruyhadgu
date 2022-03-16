@@ -135,12 +135,12 @@ for _ in range(Players.number_of_players):
     players[player_info.player_id] = int(player_info.buyin_amount)
 
 # Players place minimum bets
-minimum_bet = 10
+minimum_bet = [5, 10, 15, 20]
 game_over = False
 while game_over == False:
     make_bet = {}
     for key in players:
-        make_bet[key] = int(Players.betting(key))
+        make_bet[key] = minimum_bet
         players[key]= players[key] - make_bet[key]
     print(players)
 
