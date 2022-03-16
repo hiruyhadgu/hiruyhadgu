@@ -1,4 +1,5 @@
 from audioop import add
+from copy import copy
 import random
 # GLOBAL VARIABLES values, suits, and ranks ARE USED THROUGHOUT THE CODE. THE PART STILL UNCLEAR
 # IS HOW TO ASSIGN A ONE OR 11 TO ACE
@@ -42,7 +43,7 @@ class Players:
             input('Buy in amount in dollars: '))
     
     def keep_playing(self):
-        player_decide = input(f"Player {self.player_id}, keep playing? (y or n): ")
+        player_decide = input(f"Player {key.upper()}, keep playing? (y or n): ")
         return player_decide
     
     def new_hand(self):
@@ -233,19 +234,30 @@ while game_over == False:
     for key, value in dealer_hand.items():
         print(key, value)
     all_sum = {**dealer_sum, **add_cards}
+   
+    if dealer_sum['dealer_hand'] > 21:
+        
+        for num in range(len(add_cards)):
+           max_val = add_cards[key]
+           while max_val > add_cards[key] and max_val < 21:
+               max_val = add_cards[key]
+    elif dealer_sum['dealer_hand']==21:
+        for key in add_cards:
+            max_val = add_cards[key]
+            while max_val == a
+       
+       for key in add_cards:
+           if add_cards[key] < 21:
+               
 
-    for key in all_sum.copy():
-        if value > 21:
-            all_sum.pop(key)
+       
+    for key in players.copy():
+       decide = Players.keep_playing(key)
+       if decide == 'n':
+           players.pop(key)
+    if players=={}:
+        game_over=True
 
-    decide = []
-    if all_sum =={}:
-        for key in player_info:
-            decide = Players.keep_playing(decide)
-            if decide == 'n':
-                player_info[key]      
-
-    game_over=True
 print(all_sum)
 print(dealer_sum)
 print(add_cards)
