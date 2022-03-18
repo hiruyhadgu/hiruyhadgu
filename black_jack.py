@@ -1,8 +1,11 @@
+#%% [markdown]
 from audioop import add
 from calendar import c
 from copy import copy
 import random
 import matplotlib.pyplot as plt
+import numpy as np
+from tabulate import tabulate
 # GLOBAL VARIABLES values, suits, and ranks ARE USED THROUGHOUT THE CODE. THE PART STILL UNCLEAR
 # IS HOW TO ASSIGN A ONE OR 11 TO ACE
 values = {'Two':2, 'Three':3, 'Four':4, 'Five':5, 'Six':6, 'Seven':7, 'Eight': 8, 
@@ -96,10 +99,11 @@ class Decks:
         random.shuffle(self.all_cards)
     
     def deal_one(self):
-        return self.all_cards.pop()
+        self.car=self.all_cards.pop()
+        return self.car
 
     def insert_back(self):
-        return self.all_cards.insert(0, Players.new_hand)
+        return self.all_cards.insert(0, self.car)
 
 class DealerHand:
         
@@ -180,6 +184,7 @@ for min_bet in minimum_bet:
                 hit_stay_or_fold = 2
             while hit_stay_or_fold == 1:
                 dealt_hand[key] = Players.deal_hand(key)
+                new_deck.insert_back()
                 set_of_hands=dealt_hand[key]
                 temp_va = set_of_hands[0][1]
                 if set_of_hands[0][1] == 'Ace':
@@ -208,6 +213,7 @@ for min_bet in minimum_bet:
             dealer_card_no+=1
             card_no = 'card_no_' + str(dealer_card_no)
             dealer_hand[card_no]=DealerHand.dealer_cards(dealer_hand)
+            new_deck.insert_back()
             dealer_next_card = dealer_hand[card_no]
             if dealer_next_card.rank == 'Ace' and there_was_ace == True:
                 ace_tuple = dealer_next_card.value
@@ -258,5 +264,11 @@ for min_bet in minimum_bet:
         if players[key] < 5:
             game_over=True
         print(no_rounds)
-print(no_rounds, dollars_per_round, dealer_total, player_total)
+empty_array = np.array([[no_rounds], 
+                        [dollars_per_round], 
+                        [dealer_total], 
+                        [player_total]])
+#print(no_rounds, dollars_per_round, dealer_total, player_total)
+print(empty_array)
 plt.plot(no_rounds, dollars_per_round)
+# %%
