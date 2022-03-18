@@ -1,4 +1,5 @@
 from audioop import add
+from calendar import c
 from copy import copy
 import random
 import matplotlib.pyplot as plt
@@ -74,7 +75,7 @@ class Decks:
     #specify number of decks to play with
     while True:
         try:
-            number_of_decks = 1
+            number_of_decks = 3
             break
         except ValueError:
             print("Please input integer only...")
@@ -97,6 +98,9 @@ class Decks:
     def deal_one(self):
         return self.all_cards.pop()
 
+    def insert_back(self):
+        return self.all_cards.insert(0, Players.new_hand)
+
 class DealerHand:
         
     def dealer_cards(self):
@@ -116,11 +120,6 @@ class DealerHand:
             deal_cards.append('fold')
             return deal_cards
     
-def adder(*args):
-    sum_player_cards = 0
-    for c in args:
-        sum_player_cards = sum_player_cards + c
-        return sum_player_cards
 
 new_deck = Decks()
 new_deck.shuffle()
@@ -132,12 +131,15 @@ players={'one':100}
 #    players[player_info.player_id] = int(player_info.buyin_amount)
 
 # Players place minimum bets
-minimum_bet = [5, 10, 15, 20]
+minimum_bet = [5]
 game_over = False
+
 for min_bet in minimum_bet:
     rounds=0
     no_rounds = []
     dollars_per_round = []
+    dealer_total=[]
+    player_total = []
     while game_over == False:
         make_bet = {}
         for key in players:
@@ -150,6 +152,7 @@ for min_bet in minimum_bet:
         dealer_card_no=1
         card_no = 'card_no_' + str(dealer_card_no)
         dealer_hand[card_no]=DealerHand.dealer_cards(dealer_hand)
+        new_deck.insert_back()
         dealer_first_card = dealer_hand[card_no]
         sum_of_cards = 0
         there_was_ace = False
@@ -194,8 +197,7 @@ for min_bet in minimum_bet:
                 set_of_cards.append(tuple(set_of_hands[0]))
                 if player_card_sum >= 21:
                     hit_stay_or_fold = 2     
-                add_cards[key] = add_cards[key]+player_card_sum
-            print(add_cards)
+                print(add_cards)
             
 
         #    player_card_sum=0
@@ -244,15 +246,17 @@ for min_bet in minimum_bet:
         print(add_cards)
         print(players)               
         
- #       for key in players.copy():
-  #          decide = 'y'
- #           if decide == 'n':
-  #              players.pop(key)
+#       for key in players.copy():
+#          decide = 'y'
+#           if decide == 'n':
+#              players.pop(key)
         rounds+=1
         no_rounds.append(rounds)
         dollars_per_round.append(players[key])
+        player_total.append(player_card_sum)
+        dealer_total.append(sum_of_cards)
         if players[key] < 5:
             game_over=True
-print(no_rounds)
-print(dollars_per_round)
+        print(no_rounds)
+print(no_rounds, dollars_per_round, dealer_total, player_total)
 plt.plot(no_rounds, dollars_per_round)
