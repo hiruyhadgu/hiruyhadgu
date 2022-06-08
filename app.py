@@ -59,9 +59,6 @@ st.markdown(f'*Number of Contributions: {number_of_results}*')
 st.markdown(f'*Total Contribution for Selected Range: ${sum_of_results:,.2f}*')
 st.dataframe(df_master[mask])
 
-
-st.dataframe(developer_contributions)
-
 df_contribution_sum = df_master[mask].groupby(by = ['Contributor Name', 'Receiving Committee']).sum()[['Contribution Amount']]
 df_contribution_count = df_master[mask].groupby(by = ['Contributor Name','Receiving Committee']).count()[['Contribution Amount']]
 df_contribution_count = df_contribution_count.rename(columns = {'Contribution Amount':'No of Contributions'})
