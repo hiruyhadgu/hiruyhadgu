@@ -42,7 +42,7 @@ mask = (df_master['Filing Period']==selected_period) & (df_master['Contribution 
                                     df_master['Receiving Committee'].isin(candidate_selection))
 number_of_results = df_master[mask].shape[0]
 sum_of_results = df_master[mask]['Contribution Amount'].sum()
-df_master = df_master.style.format({'Contribution Date': lambda x: "{}".format(x.strftime('%m-%d-%Y'))}).set_table_styles('styles')
+df_master = df_master.style.format({'Contribution Date': lambda x: "{}".format(x.strftime('%m-%d-%Y'))})
 st.markdown(f'*Number of Contributions: {number_of_results}*')
 st.markdown(f'*Total Contribution for Selected Range: ${sum_of_results:,.2f}*')
 st.dataframe(df_master[mask])
