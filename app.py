@@ -3,6 +3,7 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 from PIL import Image
+import openpyxl
 
 
 st.set_page_config(page_title='Howard County Council Candidate Contributions')
@@ -15,10 +16,8 @@ df = []
 
 for file in os.listdir(data_file_folder):
     if file.endswith('.xlsx'):
-        print(len(file))
         sheet_name, extension = file.split('.')
         df.append(pd.read_excel(file, sheet_name = sheet_name, usecols = 'A:J'))
-len(df)
 df_master = pd.concat(df, axis=0)
 
 candidate_name = df_master['Receiving Committee'].unique().tolist()
