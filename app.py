@@ -25,8 +25,8 @@ donor_name = df_master['Contributor Name'].unique().tolist()
 contributions = df_master['Contribution Amount'].unique().tolist()
 filing_period = df_master['Filing Period'].unique().tolist()
 
-menu = ['Image Based']
-st.sidebar.header('Choose Election')
+menu = ['County Executive', 'County Council D1', 'County Council D2', 'County Council D3', 'County Council D4', 'County Council D5']
+st.sidebar.header('Choose Election', menu)
 #choice = st.sidebar.selectbox('Pick Race?', menu)
 
 selected_period = st.selectbox('Filing Period:', filing_period)
