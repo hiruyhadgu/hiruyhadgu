@@ -36,15 +36,31 @@ candidate_selection = st.multiselect('Candidate Name:',
                                     candidate_name,
                                     default = candidate_name)
 
+developer_list = pd.read_csv('developercrossreference.csv').drop_duplicates()
+developer_list = developer_list.dropna()
+developer_list['Developer/Developer Affiliated']=developer_list['Developer/Developer Affiliated'].str.lower()
+developer_id = developer_list['Developer/Developer Affiliated']=='yes'
+developer_list = developer_list[developer_id]
+developer_list=developer_list.reset_index()
+developer_list = developer_list.drop(columns = 'index')
+developer_filter=df_master['Contributor Name'].isin(developer_list['Contributor Name'])
+developer_contributions = df_master[developer_filter]
+developer = st.checkbox('Display Developer Contributions Only')
 
-
-mask = (df_master['Filing Period']==selected_period) & (df_master['Contribution Amount'].between(*contributions_selection)) & (
+if developer:
+     mask =(df_master['Contributor Name'].isin(developer_list['Contributor Name']))&(df_master['Filing Period']==selected_period) & (df_master['Contribution Amount'].between(*contributions_selection)) & (
                                     df_master['Receiving Committee'].isin(candidate_selection))
+else:
+    mask = (df_master['Filing Period']==selected_period) & (df_master['Contribution Amount'].between(*contributions_selection)) & (
+                                    df_master['Receiving Committee'].isin(candidate_selection)) 
 number_of_results = df_master[mask].shape[0]
 sum_of_results = df_master[mask]['Contribution Amount'].sum()
 st.markdown(f'*Number of Contributions: {number_of_results}*')
 st.markdown(f'*Total Contribution for Selected Range: ${sum_of_results:,.2f}*')
 st.dataframe(df_master[mask])
+
+
+st.dataframe(developer_contributions)
 
 df_contribution_sum = df_master[mask].groupby(by = ['Contributor Name', 'Receiving Committee']).sum()[['Contribution Amount']]
 df_contribution_count = df_master[mask].groupby(by = ['Contributor Name','Receiving Committee']).count()[['Contribution Amount']]
