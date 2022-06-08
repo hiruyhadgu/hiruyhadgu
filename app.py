@@ -25,9 +25,9 @@ donor_name = df_master['Contributor Name'].unique().tolist()
 contributions = df_master['Contribution Amount'].unique().tolist()
 filing_period = df_master['Filing Period'].unique().tolist()
 
- menu = ['Image Based']
-    st.sidebar.header('Choose Election')
-    choice = st.sidebar.selectbox('Pick Race?', menu)
+menu = ['Image Based']
+st.sidebar.header('Choose Election')
+#choice = st.sidebar.selectbox('Pick Race?', menu)
 
 selected_period = st.selectbox('Filing Period:', filing_period)
 
