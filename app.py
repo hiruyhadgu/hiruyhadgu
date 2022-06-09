@@ -16,7 +16,7 @@ st.write('Howard County will hold its primary elections on July 19, 2022.\
 
 ### --- LOAD DATAFRAME
 
-menu = ['County Executive CE', 'County Council D1', 'County Council D2', 'County Council D3', 'County Council D4', 'County Council D5']
+menu = ['County Council D1','County Executive CE', 'County Council D2', 'County Council D3', 'County Council D4', 'County Council D5']
 st.sidebar.header('Choose Election')
 choice = st.sidebar.selectbox('Pick Race:', menu)
 st.subheader(f'Viewing: {choice} Filing')
