@@ -3,22 +3,33 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 from PIL import Image
+import openpyxl
 
 
 st.set_page_config(page_title='Howard County Council Candidate Contributions')
-st.header('2022 Primary Elections')
-st.subheader('Know who is contributing in your local elections')
+#st.header('Howard County 2022 Elections for County Executive and County Council')
+st.markdown("<h1 style='text-align: center; color: #007af9;'>Howard County 2022 Elections \
+for County Executive and County Council</h1>", unsafe_allow_html=True)
+st.write('Howard County will hold its primary elections on July 19, 2022.\
+            Council seats in District 1 and District 4 and the County Executive race.\
+                This page show which candidates rely on contributions for developers.')
 
 ### --- LOAD DATAFRAME
-data_file_folder = './'
+
+menu = ['County Council D1','County Executive CE', 'County Council D2', 'County Council D3', 'County Council D4', 'County Council D5']
+st.sidebar.header('Choose Election')
+choice = st.sidebar.selectbox('Pick Race:', menu)
+st.subheader(f'Viewing: {choice} Filing')
+
+foldername = choice.split(' ')[-1]
+data_file_folder = f'./{foldername}'
 df = []
 
 for file in os.listdir(data_file_folder):
     if file.endswith('.xlsx'):
-        print(len(file))
         sheet_name, extension = file.split('.')
+        file = f'{data_file_folder}/{file}'
         df.append(pd.read_excel(file, sheet_name = sheet_name, usecols = 'A:J'))
-len(df)
 df_master = pd.concat(df, axis=0)
 
 candidate_name = df_master['Receiving Committee'].unique().tolist()
@@ -37,13 +48,26 @@ candidate_selection = st.multiselect('Candidate Name:',
                                     candidate_name,
                                     default = candidate_name)
 
+developer_list = pd.read_csv('developercrossreference.csv').drop_duplicates()
+developer_list = developer_list.dropna()
+developer_list['Developer/Developer Affiliated']=developer_list['Developer/Developer Affiliated'].str.lower()
+developer_id = developer_list['Developer/Developer Affiliated']=='yes'
+developer_list = developer_list[developer_id]
+developer_list=developer_list.reset_index()
+developer_list = developer_list.drop(columns = 'index')
+developer_filter=df_master['Contributor Name'].isin(developer_list['Contributor Name'])
+developer_contributions = df_master[developer_filter]
+developer = st.checkbox('Display Developer Contributions Only')
 
-
-mask = (df_master['Filing Period']==selected_period) & (df_master['Contribution Amount'].between(*contributions_selection)) & (
+if developer:
+     mask =(df_master['Contributor Name'].isin(developer_list['Contributor Name']))&(df_master['Filing Period']==selected_period) & (df_master['Contribution Amount'].between(*contributions_selection)) & (
                                     df_master['Receiving Committee'].isin(candidate_selection))
+else:
+    mask = (df_master['Filing Period']==selected_period) & (df_master['Contribution Amount'].between(*contributions_selection)) & (
+                                    df_master['Receiving Committee'].isin(candidate_selection)) 
 number_of_results = df_master[mask].shape[0]
 sum_of_results = df_master[mask]['Contribution Amount'].sum()
-st.markdown(f'*Number of Contributions: ${number_of_results}*')
+st.markdown(f'*Number of Contributions: {number_of_results}*')
 st.markdown(f'*Total Contribution for Selected Range: ${sum_of_results:,.2f}*')
 st.dataframe(df_master[mask])
 
