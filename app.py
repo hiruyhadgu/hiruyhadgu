@@ -55,6 +55,7 @@ developer_list['Developer/Developer Affiliated']=developer_list['Developer/Devel
 developer_id = developer_list['Developer/Developer Affiliated']=='yes'
 developer_list = developer_list[developer_id]
 developer_list=developer_list.reset_index()
+developer_list = developer_list.drop_duplicates(subset=['Contributor Name'])
 developer_list = developer_list.drop(columns = 'index')
 developer_filter=df_master['Contributor Name'].isin(developer_list['Contributor Name'])
 developer_contributions = df_master[developer_filter]
@@ -103,13 +104,13 @@ df = pd.DataFrame(selected) #Pass the selected rows to a new dataframe df
 
 df_filtered = df_master[mask]
 
-df_contribution_sum = df_filtered.groupby(['Contributor Name', 'Receiving Committee']).sum()[['Contribution Amount']]
-df_contribution_count = df_filtered.groupby(['Contributor Name','Receiving Committee']).count()[['Contribution Amount']]
+df_contribution_sum = df_master[mask].groupby(['Contributor Name', 'Receiving Committee']).sum()[['Contribution Amount']]
+df_contribution_count = df_master[mask].groupby(['Contributor Name','Receiving Committee']).count()[['Contribution Amount']]
 df_contribution_count = df_contribution_count.rename(columns = {'Contribution Amount':'No of Contributions'})
 df_grouped = [df_contribution_sum, df_contribution_count]
 df_grouped = pd.concat(df_grouped, axis = 1)
 df_grouped = df_grouped.sort_values(by=['No of Contributions'], ascending = False)
-df_grouped.columns = df_grouped.columns.astype('str')
+#df_grouped.columns = df_grouped.columns.astype('str')
 #df_grouped = df_grouped.unstack()
 #st.sidebar.selectbox("Select Candidate Name:", candidate_name)
 # AgGrid(df_grouped.reset_index())
@@ -135,5 +136,5 @@ grid_response = AgGrid(
 
 data = grid_response['data']
 selected = grid_response['selected_rows'] 
-df = pd.DataFrame(selected) #Pass the selected rows to a new dataframe df
-st.dataframe(df)
+df_selected = pd.DataFrame(selected) #Pass the selected rows to a new dataframe df
+st.dataframe(df_selected)
