@@ -99,7 +99,8 @@ grid_response = AgGrid(
 
 data = grid_response['data']
 selected = grid_response['selected_rows'] 
-df = pd.DataFrame(selected) #Pass the selected rows to a new dataframe df
+df_selected = pd.DataFrame(selected) #Pass the selected rows to a new dataframe df
+st.dataframe(df_selected)
 
 df_filtered = df_master[mask]
 
@@ -125,7 +126,7 @@ grid_response = AgGrid(df_grouped_copy,
     update_mode='MODEL_CHANGED', 
     fit_columns_on_grid_load=False,
     theme='blue', #Add theme color to the table
- #   enable_enterprise_modules=True,
+    #enable_enterprise_modules=True,
     height=450, 
     #width='100%',
     reload_data=True
