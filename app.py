@@ -63,13 +63,13 @@ developer = st.checkbox('Display Developer Contributions Only')
 
 
 ### --- DEFINING THE FILTER CRITERIA. IF 'developer' IS SELECTED, THE FILTER WILL INCLUDE ONLY DEVELOPERS
-
-if developer:
-     mask =(df_master['Contributor Name'].isin(developer_list['Contributor Name']))&(df_master['Filing Period']==selected_period) & (df_master['Contribution Amount'].between(*contributions_selection)) & (
+base_mask = (df_master['Filing Period']==selected_period) & (df_master['Contribution Amount'].between(*contributions_selection)) & (
                                     df_master['Receiving Committee'].isin(candidate_selection))
+if developer:
+    mask =(developer_filter) & (base_mask)
 else:
-    mask = (df_master['Filing Period']==selected_period) & (df_master['Contribution Amount'].between(*contributions_selection)) & (
-                                    df_master['Receiving Committee'].isin(candidate_selection)) 
+    mask = base_mask
+
 number_of_results = df_master[mask].shape[0]
 sum_of_results = df_master[mask]['Contribution Amount'].sum()
 st.markdown(f'*Number of Contributions: {number_of_results}*')
@@ -78,61 +78,45 @@ st.markdown(f'*Total Contribution for Selected Range: ${sum_of_results:,.2f}*')
 df_master_copy = df_master[mask]
 df_master_copy['Contribution Amount']=df_master_copy['Contribution Amount'].astype(float).apply('${:,.2f}'.format)
 
-gb = GridOptionsBuilder.from_dataframe(df_master_copy)
-gb.configure_pagination(paginationAutoPageSize=True) #Add pagination
-gb.configure_side_bar() #Add a sidebar
-gb.configure_selection('multiple', use_checkbox=True, groupSelectsChildren="Group checkbox select children") #Enable multi-row selection
-gridOptions = gb.build()
+def ag_grid(data_set):
 
-grid_response = AgGrid(
-    df_master_copy,
-    gridOptions=gridOptions,
-    data_return_mode='AS_INPUT', 
-    update_mode='MODEL_CHANGED', 
-    fit_columns_on_grid_load=False,
-    theme='blue', #Add theme color to the table
-    #enable_enterprise_modules=True,
-    height=450, 
-    #width='100%',
-    reload_data=True
-)
+    gb = GridOptionsBuilder.from_dataframe(data_set)
+    gb.configure_pagination(paginationAutoPageSize=True) #Add pagination
+    gb.configure_side_bar() #Add a sidebar
+    # sel_mode = st.radio('Selection Type', options=['single','multiple'])
+    gb.configure_selection(selection_mode='multiple', use_checkbox=True, groupSelectsChildren="Group checkbox select children") #Enable multi-row selection
+    gridoptions = gb.build()
 
-data = grid_response['data']
-selected = grid_response['selected_rows'] 
-df_selected = pd.DataFrame(selected) #Pass the selected rows to a new dataframe df
-st.dataframe(df_selected)
+    grid_response = AgGrid(
+        data_set,
+        gridOptions=gridoptions,
+        data_return_mode=DataReturnMode.AS_INPUT, 
+        update_mode=GridUpdateMode.MODEL_CHANGED, 
+        fit_columns_on_grid_load=False,
+        theme='blue', #Add theme color to the table
+        #enable_enterprise_modules=True,
+        height=450, 
+        #width='100%',
+        reload_data=False
+    )
 
-df_filtered = df_master[mask]
+    data = grid_response['data']
+    selected = grid_response['selected_rows'] 
+    df_selected = pd.DataFrame(selected) #Pass the selected rows to a new dataframe df
+    st.dataframe(df_selected)
 
+ag_grid(df_master_copy)
 
-df_grouped1 = df_master[mask].groupby(['Contributor Name', 'Receiving Committee'])
-df_grouped = df_grouped1.agg(
-    TotalContribution = ("Contribution Amount","sum"),
-     NoofContribution=("Contribution Amount","count")).reset_index()
-df_grouped = df_grouped.sort_values(by=['NoofContribution'], ascending = False)
+#df_grouped1 = df_master[mask][['Contributor Name', 'Receiving Committee', 'Contribution Amount']]
+df_grouped = df_master[mask].groupby(['Contributor Name', 'Receiving Committee']).agg({'Contribution Amount':["sum"], 'Contributor Name':["count"]})
+df_grouped.columns=['Total Contribution', 'No of Contributions']
+#df_grouped1 = df_master[mask].groupby(['Contributor Name', 'Receiving Committee']).agg(['Contributio'])
+#df_grouped = df_grouped1.agg(
+#    TotalContribution = ("Contribution Amount","sum"),
+#     NoofContribution=("Contribution Amount","count")).reset_index()
+df_grouped = df_grouped.sort_values(by=['No of Contributions'], ascending = False)
 
-df_grouped_copy = df_grouped
-df_grouped_copy['TotalContribution']=df_grouped_copy['TotalContribution'].astype(float).apply('${:,.2f}'.format)
+#df_grouped_copy = df_grouped
+df_grouped['Total Contribution']=df_grouped['Total Contribution'].astype(float).apply('${:,.2f}'.format)
 
-gb = GridOptionsBuilder.from_dataframe(df_grouped_copy)
-gb.configure_pagination(paginationAutoPageSize=True) #Add pagination
-gb.configure_side_bar() #Add a sidebar
-gb.configure_selection('multiple', use_checkbox=True, groupSelectsChildren="Group checkbox select children") #Enable multi-row selection
-gridOptions = gb.build()
-
-grid_response = AgGrid(df_grouped_copy,
-    gridOptions=gridOptions,
-    data_return_mode='AS_INPUT', 
-    update_mode='MODEL_CHANGED', 
-    fit_columns_on_grid_load=False,
-    theme='blue', #Add theme color to the table
-    #enable_enterprise_modules=True,
-    height=450, 
-    #width='100%',
-    reload_data=True
-)
-
-data = grid_response['data']
-selected = grid_response['selected_rows'] 
-df_selected = pd.DataFrame(selected) #Pass the selected rows to a new dataframe df
-st.dataframe(df_selected)
+ag_grid(df_grouped.reset_index())
