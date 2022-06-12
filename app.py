@@ -145,5 +145,5 @@ if plot_data:
             table_cols = df_grouped_for_plot.reset_index().sort_values(by=['Total Contribution'], ascending = False).head(10)
             #x_select=st.selectbox('Pick X Axis',table_cols)
            # y_select=st.selectbox('Pick Y Axis', table_cols)
-            fig = px.bar(df_master_copy, x=table_cols['Contributor Name'], y=table_cols['Total Contribution'])
+            fig = px.bar(table_cols, x=table_cols['Contributor Name'], y=table_cols['Total Contribution'])
             display = st.plotly_chart(fig)
