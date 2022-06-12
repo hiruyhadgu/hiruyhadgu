@@ -135,15 +135,23 @@ if plot_data:
         picked_plot = st.sidebar.selectbox('Pick a Plot', plots)
         #st.write(f'{len(picked_plot)}')
         if picked_plot == plots[1]:
-            st.write('Select the "Display Developer Contributions" checkbox')
-            data_set=['Developer Donations', 'Remaining']
-            percent_dev = df_master[mask]['Contribution Amount'].sum()/df_master[base_mask]['Contribution Amount'].sum()
-            values = [percent_dev, 1-percent_dev]
-            fig = px.pie(df_master['Contribution Amount'], values=values, names=data_set)
-            display = st.plotly_chart(fig)
+            try:
+                st.write('Select the "Display Developer Contributions" checkbox')
+                data_set=['Developer Donations', 'Remaining']
+                percent_dev = df_master[mask]['Contribution Amount'].sum()/df_master[base_mask]['Contribution Amount'].sum()
+                values = [percent_dev, 1-percent_dev]
+                fig = px.pie(df_master['Contribution Amount'], values=values, names=data_set)
+                display = st.plotly_chart(fig)
+            except ValueError:
+                st.markdown('### Data does not exist for selected criteria.')
+                st.code('Try a different filing period.')
         elif picked_plot == plots[0]:
-            table_cols = df_grouped_for_plot.reset_index().sort_values(by=['Total Contribution'], ascending = False).head(10)
-            #x_select=st.selectbox('Pick X Axis',table_cols)
-           # y_select=st.selectbox('Pick Y Axis', table_cols)
-            fig = px.bar(table_cols, x=table_cols['Contributor Name'], y=table_cols['Total Contribution'])
-            display = st.plotly_chart(fig)
+            try:
+                table_cols = df_grouped_for_plot.reset_index().sort_values(by=['Total Contribution'], ascending = False).head(10)
+                #x_select=st.selectbox('Pick X Axis',table_cols)
+            # y_select=st.selectbox('Pick Y Axis', table_cols)
+                fig = px.bar(table_cols, x=table_cols['Contributor Name'], y=table_cols['Total Contribution'])
+                display = st.plotly_chart(fig)
+            except ValueError:
+                st.markdown('### Data does not exist for selected criteria.')
+                st.code('Try a different filing period.')
