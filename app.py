@@ -8,6 +8,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import openpyxl
 from PIL import Image
+from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode, DataReturnMode
 from funcs import ag_grid
 
 ### --- SET UP THE PAGE
