@@ -1,3 +1,4 @@
+from calendar import c
 from email.policy import default
 import os
 from matplotlib.pyplot import plot
@@ -100,14 +101,26 @@ with crossref:
                                     df_master['Receiving Committee'].isin(candidate_selection))
     if developer:
         mask =(developer_filter) & (base_mask)
+        bar_mask = True
+        who = 'Developers'
     else:
         mask = base_mask
-
-    number_of_results = df_master[mask].shape[0]
-    sum_of_results = df_master[mask]['Contribution Amount'].sum()
+        bar_mask=False
+        who = 'All'
+    
     st.markdown('#### Campaign Finance Summary for Selected Criteria')
-    st.text(f'Number of Contributions: {number_of_results} \nTotal Contribution: ${sum_of_results:,.2f}')
-
+    summary_cols = st.columns(len(candidate_selection)+1)
+    nn=0
+    with summary_cols[nn]:
+         st.text(f'{who} \nCount: \nSum:')
+         nn+=1
+    for candidate in candidate_selection:
+        narrow_mask = df_master[mask]['Receiving Committee']==candidate
+        number_of_results = df_master[mask][narrow_mask].shape[0]
+        sum_of_results = df_master[mask][narrow_mask]['Contribution Amount'].sum()
+        with summary_cols[nn]:  
+            st.text(f'{candidate} \n{number_of_results} \n${sum_of_results:,.2f}')
+        nn+=1
     df_master_copy = df_master[mask]
     df_master_copy['Contribution Amount']=df_master_copy['Contribution Amount'].astype(float).apply('${:,.2f}'.format)
 
@@ -115,6 +128,7 @@ display_options= ['Report by Filing Period', 'Summary Statistics', 'Show Figures
 display = st.sidebar.selectbox('Show Report', options=display_options, index=0)
 
 if display == display_options[0]:
+    st.caption(f'{who} Contributortions As Reported in MDCRIS')
     display=ag_grid(df_master_copy)
     
 df_grouped = df_master[mask].groupby(['Contributor Name', 'Receiving Committee']).agg({'Contribution Amount':["sum"], 'Contributor Name':["count"]})
@@ -122,7 +136,9 @@ df_grouped.columns=['Total Contribution', 'No of Contributions']
 df_grouped_for_plot = df_grouped
 df_grouped = df_grouped.sort_values(by=['No of Contributions'], ascending = False)
 df_grouped['Total Contribution']=df_grouped['Total Contribution'].astype(float).apply('${:,.2f}'.format)
+
 if display == display_options[1]:
+    st.caption(f'Total Amount and Number of Contributions by {who}')
     display = ag_grid(df_grouped.reset_index())
 
 plot_data=False
@@ -131,26 +147,48 @@ if display==display_options[2]:
 
 if plot_data:
 
-        plots = ['Top Ten Contributions', 'Developer Percent Contribution', 'By Filing Period']
+        plots = ['Developer Percent Contribution','Top N Contributions', 'By Filing Period']
         picked_plot = st.sidebar.selectbox('Pick a Plot', plots)
         #st.write(f'{len(picked_plot)}')
-        if picked_plot == plots[1]:
+        if picked_plot == plots[0]:
+            if developer:
+                try:
+                   # st.write('Select the "Display Developer Contributions" checkbox')
+                    data_set=['Developer Donations', 'Remaining']
+                    percent_dev = df_master[mask]['Contribution Amount'].sum()/df_master[base_mask]['Contribution Amount'].sum()
+                    values = [percent_dev, 1-percent_dev]
+                    fig = px.pie(df_master['Contribution Amount'], values=values, names=data_set)
+                    st.caption('Percent share of contributions from developers. Note that some candidates\
+                        participate in public financing or did not file for the selected criteria.')
+                    display = st.plotly_chart(fig)
+                except ValueError:
+                    st.markdown('### Data does not exist for selected criteria.')
+                    st.code('Try a different filing period.')
+            else:
+                st.markdown('Select the **Display Developer Contributions Only** checkbox')
+        elif picked_plot == plots[1]:
+            n = st.sidebar.slider('How Many Contributions?:', 
+                                    min_value = 10,
+                                    max_value = 40)
             try:
-                st.write('Select the "Display Developer Contributions" checkbox')
-                data_set=['Developer Donations', 'Remaining']
-                percent_dev = df_master[mask]['Contribution Amount'].sum()/df_master[base_mask]['Contribution Amount'].sum()
-                values = [percent_dev, 1-percent_dev]
-                fig = px.pie(df_master['Contribution Amount'], values=values, names=data_set)
+                table_cols = df_grouped_for_plot.reset_index().sort_values(by=['Total Contribution'], ascending = False).head(n)
+                fig = px.bar(table_cols, x=table_cols['Contributor Name'], y=table_cols['Total Contribution'])
                 display = st.plotly_chart(fig)
             except ValueError:
                 st.markdown('### Data does not exist for selected criteria.')
                 st.code('Try a different filing period.')
-        elif picked_plot == plots[0]:
+        elif picked_plot == plots[2]:
             try:
-                table_cols = df_grouped_for_plot.reset_index().sort_values(by=['Total Contribution'], ascending = False).head(10)
-                #x_select=st.selectbox('Pick X Axis',table_cols)
-            # y_select=st.selectbox('Pick Y Axis', table_cols)
-                fig = px.bar(table_cols, x=table_cols['Contributor Name'], y=table_cols['Total Contribution'])
+                if bar_mask:
+                    df_master_bar = df_master[developer_filter]
+                else:
+                    df_master_bar = df_master
+
+                contribution_by_filing_period = df_master_bar.groupby(['Receiving Committee','Filing Period'])
+                contribution_by_filing_period=contribution_by_filing_period.agg(
+                    TotalContribution =('Contribution Amount','sum')).reset_index()
+                fig = px.bar(contribution_by_filing_period, x = contribution_by_filing_period['Filing Period'], 
+                            y=contribution_by_filing_period['TotalContribution'],color=contribution_by_filing_period['Receiving Committee'])
                 display = st.plotly_chart(fig)
             except ValueError:
                 st.markdown('### Data does not exist for selected criteria.')
