@@ -172,7 +172,7 @@ if plot_data:
                                     max_value = 40)
             try:
                 table_cols = df_grouped_for_plot.reset_index().sort_values(by=['Total Contribution'], ascending = False).head(n)
-                fig = px.bar(table_cols, x=table_cols['Contributor Name'], y=table_cols['Total Contribution'])
+                fig = px.bar(table_cols, x=table_cols['Contributor Name'], y=table_cols['Total Contribution'],color=table_cols['Receiving Committee'])
                 display = st.plotly_chart(fig)
             except ValueError:
                 st.markdown('### Data does not exist for selected criteria.')
